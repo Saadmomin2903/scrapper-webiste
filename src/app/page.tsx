@@ -83,7 +83,7 @@ function GradientBG({ children }: { children: React.ReactNode }) {
       <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-purple-500/10 animate-pulse"></div>
       <div className="absolute top-0 left-0 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-bounce"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="relative z-10 w-full">{children}</div>
+      <div className="relative z-10 w-full perspective-3d">{children}</div>
     </div>
   );
 }
@@ -233,8 +233,8 @@ export default function Home() {
   return (
     <GradientBG>
       <div className="w-full max-w-5xl mx-auto mt-8">
-        <div className="text-center mb-8">
-          <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600 mb-4 drop-shadow-2xl">
+        <div className="text-center mb-8 animate-fade-in-up">
+          <h1 className="text-6xl font-black gradient-text mb-4 drop-shadow-2xl animate-glow">
             Job Scraper Portal
           </h1>
           <p className="text-xl text-purple-200 text-center mb-4 font-medium">
@@ -244,36 +244,36 @@ export default function Home() {
             API: {API_BASE}
           </p>
           <div className="flex justify-center gap-2 text-xs text-purple-300/60">
-            <span className="px-2 py-1 bg-purple-800/50 rounded-full">
+            <span className="px-2 py-1 bg-purple-800/50 rounded-full hover-lift">
               Foundit
             </span>
-            <span className="px-2 py-1 bg-purple-800/50 rounded-full">
+            <span className="px-2 py-1 bg-purple-800/50 rounded-full hover-lift">
               Glassdoor
             </span>
-            <span className="px-2 py-1 bg-purple-800/50 rounded-full">
+            <span className="px-2 py-1 bg-purple-800/50 rounded-full hover-lift">
               SimplyHired
             </span>
-            <span className="px-2 py-1 bg-purple-800/50 rounded-full">
+            <span className="px-2 py-1 bg-purple-800/50 rounded-full hover-lift">
               ZipRecruiter
             </span>
-            <span className="px-2 py-1 bg-purple-800/50 rounded-full">
+            <span className="px-2 py-1 bg-purple-800/50 rounded-full hover-lift">
               LinkedIn
             </span>
-            <span className="px-2 py-1 bg-purple-800/50 rounded-full">
+            <span className="px-2 py-1 bg-purple-800/50 rounded-full hover-lift">
               Indeed
             </span>
-            <span className="px-2 py-1 bg-purple-800/50 rounded-full">
+            <span className="px-2 py-1 bg-purple-800/50 rounded-full hover-lift">
               Naukri
             </span>
           </div>
         </div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="flex justify-center gap-2 bg-black/40 backdrop-blur-xl rounded-2xl p-2 mb-8 border border-purple-500/20 shadow-2xl">
+          <TabsList className="flex justify-center gap-2 bg-black/40 backdrop-blur-xl rounded-2xl p-2 mb-8 border border-purple-500/20 shadow-2xl shadow-purple-500/10">
             {portals.map((p) => (
               <TabsTrigger
                 key={p.key}
                 value={p.key}
-                className="text-sm font-semibold px-6 py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-400 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/25 transition-all duration-300 hover:bg-purple-800/30 text-purple-200"
+                className="text-sm font-semibold px-6 py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-400 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/25 data-[state=active]:transform data-[state=active]:scale-105 transition-all duration-300 hover:bg-purple-800/30 hover:transform hover:scale-105 text-purple-200 hover:shadow-purple-500/20"
               >
                 {p.label}
               </TabsTrigger>
@@ -281,7 +281,7 @@ export default function Home() {
           </TabsList>
           {portals.map((p) => (
             <TabsContent key={p.key} value={p.key} className="w-full">
-              <Card className="mb-8 bg-black/40 backdrop-blur-xl border border-purple-500/20 shadow-2xl">
+              <Card className="mb-8 bg-black/40 backdrop-blur-xl border border-purple-500/20 shadow-2xl shadow-purple-500/10 hover:shadow-purple-500/20 transition-all duration-500 transform hover:scale-[1.02]">
                 <CardContent className="p-8 flex flex-col gap-6">
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
@@ -325,7 +325,7 @@ export default function Home() {
                         }
                         onChange={handleInput}
                         placeholder="e.g. Data Scientist"
-                        className="mt-1 bg-black/50 border-purple-500/30 text-purple-100 placeholder-purple-400/50 focus:border-purple-400 focus:ring-purple-400/20"
+                        className="mt-1 bg-black/50 border-purple-500/30 text-purple-100 placeholder-purple-400/50 focus:border-purple-400 focus:ring-purple-400/20 hover-lift transition-all duration-300"
                       />
                     </div>
                     <div className="flex-1">
@@ -341,7 +341,7 @@ export default function Home() {
                         value={form.location}
                         onChange={handleInput}
                         placeholder="e.g. India"
-                        className="mt-1 bg-black/50 border-purple-500/30 text-purple-100 placeholder-purple-400/50 focus:border-purple-400 focus:ring-purple-400/20"
+                        className="mt-1 bg-black/50 border-purple-500/30 text-purple-100 placeholder-purple-400/50 focus:border-purple-400 focus:ring-purple-400/20 hover-lift transition-all duration-300"
                       />
                     </div>
                     <div className="w-32">
@@ -387,23 +387,27 @@ export default function Home() {
                             : form.num_jobs
                         }
                         onChange={handleInput}
-                        className="mt-1 bg-black/50 border-purple-500/30 text-purple-100 placeholder-purple-400/50 focus:border-purple-400 focus:ring-purple-400/20"
+                        className="mt-1 bg-black/50 border-purple-500/30 text-purple-100 placeholder-purple-400/50 focus:border-purple-400 focus:ring-purple-400/20 hover-lift transition-all duration-300"
                       />
                     </div>
                   </div>
                   <Button
                     onClick={handleSearch}
                     disabled={loading}
-                    className="mt-4 bg-gradient-to-r from-purple-600 to-purple-400 text-white font-bold py-4 px-8 rounded-xl shadow-2xl shadow-purple-500/25 hover:from-purple-500 hover:to-purple-300 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="mt-4 bg-gradient-to-r from-purple-600 to-purple-400 text-white font-bold py-4 px-8 rounded-xl shadow-2xl shadow-purple-500/25 hover:from-purple-500 hover:to-purple-300 transition-all duration-300 transform hover:scale-105 hover:shadow-purple-500/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden group"
                   >
-                    {loading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        Searching...
-                      </div>
-                    ) : (
-                      "Search Jobs"
-                    )}
+                    {/* 3D Button glow effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+                    <div className="relative z-10">
+                      {loading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          Searching...
+                        </div>
+                      ) : (
+                        "Search Jobs"
+                      )}
+                    </div>
                   </Button>
                   {error && (
                     <div className="text-red-400 font-semibold mt-4 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
@@ -417,52 +421,59 @@ export default function Home() {
                   results.map((job: JobData, idx: number) => (
                     <Card
                       key={idx}
-                      className="bg-black/40 backdrop-blur-xl border border-purple-500/20 shadow-2xl hover:scale-[1.02] hover:shadow-purple-500/25 transition-all duration-300"
+                      className="bg-black/40 backdrop-blur-xl border border-purple-500/20 shadow-2xl hover:scale-[1.02] hover:shadow-purple-500/25 transition-all duration-300 group relative overflow-hidden"
+                      style={{ animationDelay: `${idx * 100}ms` }}
                     >
-                      <CardContent className="p-6 flex flex-col gap-3">
-                        {Object.entries(job).map(([key, value]) => (
-                          <div key={key} className="mb-2 break-words">
-                            <span className="font-bold capitalize text-purple-300 text-sm">
-                              {key}:
-                            </span>{" "}
-                            {key === "company_logo" &&
-                            typeof value === "string" ? (
-                              value.startsWith("http://") ||
-                              value.startsWith("https://") ? (
-                                <Image
-                                  src={value}
-                                  alt="Company logo"
-                                  width={64}
-                                  height={64}
-                                  className="inline-block rounded-full object-contain border-2 border-purple-500/30 ml-2 align-middle"
-                                  style={{ verticalAlign: "middle" }}
-                                />
-                              ) : (
-                                <span className="text-purple-100">{value}</span>
-                              )
-                            ) : Array.isArray(value) ? (
-                              <span className="text-purple-100">
-                                {value.join(", ")}
-                              </span>
-                            ) : key.toLowerCase().includes("url") &&
+                      {/* 3D Card glow effect */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 rounded-lg blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+                      <div className="relative z-10">
+                        <CardContent className="p-6 flex flex-col gap-3">
+                          {Object.entries(job).map(([key, value]) => (
+                            <div key={key} className="mb-2 break-words">
+                              <span className="font-bold capitalize text-purple-300 text-sm">
+                                {key}:
+                              </span>{" "}
+                              {key === "company_logo" &&
                               typeof value === "string" ? (
-                              <a
-                                href={value}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-purple-400 hover:text-purple-300 hover:underline font-semibold break-all transition-colors"
-                                style={{ wordBreak: "break-all" }}
-                              >
-                                {value}
-                              </a>
-                            ) : (
-                              <span className="text-purple-100">
-                                {String(value)}
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </CardContent>
+                                value.startsWith("http://") ||
+                                value.startsWith("https://") ? (
+                                  <Image
+                                    src={value}
+                                    alt="Company logo"
+                                    width={64}
+                                    height={64}
+                                    className="inline-block rounded-full object-contain border-2 border-purple-500/30 ml-2 align-middle"
+                                    style={{ verticalAlign: "middle" }}
+                                  />
+                                ) : (
+                                  <span className="text-purple-100">
+                                    {value}
+                                  </span>
+                                )
+                              ) : Array.isArray(value) ? (
+                                <span className="text-purple-100">
+                                  {value.join(", ")}
+                                </span>
+                              ) : key.toLowerCase().includes("url") &&
+                                typeof value === "string" ? (
+                                <a
+                                  href={value}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-purple-400 hover:text-purple-300 hover:underline font-semibold break-all transition-colors"
+                                  style={{ wordBreak: "break-all" }}
+                                >
+                                  {value}
+                                </a>
+                              ) : (
+                                <span className="text-purple-100">
+                                  {String(value)}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </CardContent>
+                      </div>
                     </Card>
                   ))
                 ) : results &&
