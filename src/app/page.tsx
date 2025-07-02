@@ -473,7 +473,7 @@ export default function Home() {
                       "extra_sections",
                     ]);
                     const otherFields = Object.entries(job).filter(
-                      ([key, value]) => !shownKeys.has(key)
+                      ([key]) => !shownKeys.has(key)
                     );
                     return (
                       <Card
@@ -561,7 +561,7 @@ export default function Home() {
                                 </div>
                               )}
                             {/* Other fields */}
-                            {otherFields.map(([key, _]) => {
+                            {otherFields.map(([key]) => {
                               const value = job[key];
                               if (typeof value === "undefined") {
                                 return null;
