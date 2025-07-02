@@ -561,15 +561,15 @@ export default function Home() {
                                 </div>
                               )}
                             {/* Other fields */}
-                            {otherFields.map(([key, value]) => {
-                              // Remove 'value' if not used, or use '_' if required by linter
+                            {otherFields.map(([key, _]) => {
+                              const value = job[key];
                               if (typeof value === "undefined") {
                                 return null;
                               }
                               return (
                                 <div key={key} className="mb-1 break-words">
                                   <span className="font-bold capitalize text-purple-300 text-sm">
-                                    {key.replace(/_/g, " ")}:
+                                    {key.replace(/_/g, " ")}
                                   </span>{" "}
                                   {Array.isArray(value) ? (
                                     <span className="text-purple-100">
