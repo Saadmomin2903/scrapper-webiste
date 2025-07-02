@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
+import ReactMarkdown from "react-markdown";
 
 // Define types for better TypeScript support
 interface JobData {
@@ -445,64 +446,189 @@ export default function Home() {
               </Card>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {results && Array.isArray(results) && results.length > 0 ? (
-                  results.map((job: JobData, idx: number) => (
-                    <Card
-                      key={idx}
-                      className="bg-black/40 backdrop-blur-xl border border-purple-500/20 shadow-2xl hover:scale-[1.02] hover:shadow-purple-500/25 transition-all duration-300 group relative overflow-hidden"
-                      style={{ animationDelay: `${idx * 100}ms` }}
-                    >
-                      {/* 3D Card glow effect */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 rounded-lg blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-                      <div className="relative z-10">
-                        <CardContent className="p-6 flex flex-col gap-3">
-                          {Object.entries(job).map(([key, value]) => (
-                            <div key={key} className="mb-2 break-words">
-                              <span className="font-bold capitalize text-purple-300 text-sm">
-                                {key}:
-                              </span>{" "}
-                              {key === "company_logo" &&
-                              typeof value === "string" ? (
-                                value.startsWith("http://") ||
-                                value.startsWith("https://") ? (
+                  results.map((job: JobData, idx: number) => {
+                    // Prepare fields for ordered display
+                    const title = job.title;
+                    const company_name = job.company_name;
+                    const company_logo = job.company_logo;
+                    const location = job.location;
+                    const salary = job.salary || job.pay;
+                    const jd_url = job.jd_url;
+                    const job_description = job.job_description;
+                    const extra_sections =
+                      job.extra_sections &&
+                      typeof job.extra_sections === "object"
+                        ? job.extra_sections
+                        : null;
+                    // Collect all other fields except the above
+                    const shownKeys = new Set([
+                      "title",
+                      "company_name",
+                      "company_logo",
+                      "location",
+                      "salary",
+                      "pay",
+                      "jd_url",
+                      "job_description",
+                      "extra_sections",
+                    ]);
+                    const otherFields = Object.entries(job).filter(
+                      ([key, value]) => !shownKeys.has(key)
+                    );
+                    return (
+                      <Card
+                        key={idx}
+                        className="bg-black/40 backdrop-blur-xl border border-purple-500/20 shadow-2xl hover:scale-[1.02] hover:shadow-purple-500/25 transition-all duration-300 group relative overflow-hidden"
+                        style={{ animationDelay: `${idx * 100}ms` }}
+                      >
+                        {/* 3D Card glow effect */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 rounded-lg blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+                        <div className="relative z-10">
+                          <CardContent className="p-6 flex flex-col gap-3">
+                            {/* Title */}
+                            {title && (
+                              <div className="text-2xl font-bold text-purple-200 mb-2">
+                                {title}
+                              </div>
+                            )}
+                            {/* Company name and logo */}
+                            {(company_name || company_logo) && (
+                              <div className="flex items-center gap-3 mb-2">
+                                {company_logo &&
+                                typeof company_logo === "string" &&
+                                (company_logo.startsWith("http://") ||
+                                  company_logo.startsWith("https://")) ? (
                                   <Image
-                                    src={value}
+                                    src={company_logo}
                                     alt="Company logo"
-                                    width={64}
-                                    height={64}
-                                    className="inline-block rounded-full object-contain border-2 border-purple-500/30 ml-2 align-middle"
-                                    style={{ verticalAlign: "middle" }}
+                                    width={48}
+                                    height={48}
+                                    className="rounded-full object-contain border-2 border-purple-500/30"
                                   />
-                                ) : (
-                                  <span className="text-purple-100">
-                                    {value}
+                                ) : null}
+                                {company_name && (
+                                  <span className="text-lg font-semibold text-purple-300">
+                                    {company_name}
                                   </span>
-                                )
-                              ) : Array.isArray(value) ? (
+                                )}
+                              </div>
+                            )}
+                            {/* Location */}
+                            {location && (
+                              <div className="mb-1">
+                                <span className="font-bold text-purple-300">
+                                  Location:
+                                </span>{" "}
                                 <span className="text-purple-100">
-                                  {value.join(", ")}
+                                  {location}
                                 </span>
-                              ) : key.toLowerCase().includes("url") &&
-                                typeof value === "string" ? (
+                              </div>
+                            )}
+                            {/* Salary/Pay */}
+                            {salary && (
+                              <div className="mb-1">
+                                <span className="font-bold text-purple-300">
+                                  Salary/Pay:
+                                </span>{" "}
+                                <span className="text-purple-100">
+                                  {salary}
+                                </span>
+                              </div>
+                            )}
+                            {/* Job URL */}
+                            {jd_url && typeof jd_url === "string" && (
+                              <div className="mb-1">
+                                <span className="font-bold text-purple-300">
+                                  Job URL:
+                                </span>{" "}
                                 <a
-                                  href={value}
+                                  href={jd_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-purple-400 hover:text-purple-300 hover:underline font-semibold break-all transition-colors"
-                                  style={{ wordBreak: "break-all" }}
                                 >
-                                  {value}
+                                  {jd_url}
                                 </a>
-                              ) : (
-                                <span className="text-purple-100">
-                                  {String(value)}
-                                </span>
+                              </div>
+                            )}
+                            {/* Job Description (markdown) */}
+                            {job_description &&
+                              typeof job_description === "string" && (
+                                <div className="prose prose-invert max-w-none text-purple-100 my-4">
+                                  <ReactMarkdown>
+                                    {job_description}
+                                  </ReactMarkdown>
+                                </div>
                               )}
-                            </div>
-                          ))}
-                        </CardContent>
-                      </div>
-                    </Card>
-                  ))
+                            {/* Other fields */}
+                            {otherFields.length > 0 && (
+                              <div className="mt-2">
+                                <h4 className="text-md font-bold text-purple-400 mb-1">
+                                  Other Details
+                                </h4>
+                                {otherFields.map(([key, value]) => (
+                                  <div key={key} className="mb-1 break-words">
+                                    <span className="font-bold capitalize text-purple-300 text-sm">
+                                      {key.replace(/_/g, " ")}:
+                                    </span>{" "}
+                                    {Array.isArray(value) ? (
+                                      <span className="text-purple-100">
+                                        {value.join(", ")}
+                                      </span>
+                                    ) : value && typeof value === "object" ? (
+                                      <details>
+                                        <summary className="text-purple-200 cursor-pointer">
+                                          Show details
+                                        </summary>
+                                        <pre className="text-purple-100 bg-black/30 rounded p-2 mt-2 overflow-x-auto text-xs">
+                                          {JSON.stringify(value, null, 2)}
+                                        </pre>
+                                      </details>
+                                    ) : (
+                                      <span className="text-purple-100">
+                                        {String(value)}
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {/* Extra Sections (job description sections) */}
+                            {extra_sections && (
+                              <div className="mt-4">
+                                <h3 className="text-lg font-bold text-purple-400 mb-2">
+                                  Job Description Sections
+                                </h3>
+                                {Object.entries(extra_sections).map(
+                                  ([section, content]) => (
+                                    <div
+                                      key={section}
+                                      className="mb-4 p-4 rounded-lg bg-purple-900/20 border border-purple-700/30"
+                                    >
+                                      <div className="font-semibold text-purple-300 mb-1 capitalize">
+                                        {section.replace(/_/g, " ")}
+                                      </div>
+                                      {Array.isArray(content) ? (
+                                        <ul className="list-disc list-inside text-purple-100">
+                                          {content.map((item, idx) => (
+                                            <li key={idx}>{item}</li>
+                                          ))}
+                                        </ul>
+                                      ) : (
+                                        <div className="text-purple-100 whitespace-pre-line">
+                                          {String(content)}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            )}
+                          </CardContent>
+                        </div>
+                      </Card>
+                    );
+                  })
                 ) : results &&
                   Array.isArray(results) &&
                   results.length === 0 ? (
