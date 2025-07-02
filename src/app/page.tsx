@@ -70,7 +70,7 @@ const portals = [
   {
     key: "naukri",
     label: "Naukri",
-    endpoint: `${API_BASE}/scrape-naukri/`,
+    endpoint: `${API_BASE}/naukri/scrape-naukri/`,
     params: ["search_term", "location", "results_wanted"],
     method: "POST",
   },
@@ -170,6 +170,8 @@ export default function Home() {
           console.log("✅ Success response:", data);
           if (portal.key === "linkedin") {
             setResults(data.job_details || []);
+          } else if (portal.key === "naukri") {
+            setResults(data.job_details || []);
           } else {
             setResults(data.jobs || data.scraped_jobs || data);
           }
@@ -236,6 +238,8 @@ export default function Home() {
 
           console.log("✅ Success response:", data);
           if (portal.key === "linkedin") {
+            setResults(data.job_details || []);
+          } else if (portal.key === "naukri") {
             setResults(data.job_details || []);
           } else {
             setResults(data.jobs || data.scraped_jobs || data);
