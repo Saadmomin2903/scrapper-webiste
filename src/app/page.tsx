@@ -561,44 +561,37 @@ export default function Home() {
                                 </div>
                               )}
                             {/* Other fields */}
-                            {otherFields.length > 0 && (
-                              <div className="mt-2">
-                                <h4 className="text-md font-bold text-purple-400 mb-1">
-                                  Other Details
-                                </h4>
-                                {otherFields.map(([key, value]) => {
-                                  // Only use value if actually referenced below
-                                  if (typeof value === "undefined") {
-                                    return null;
-                                  }
-                                  return (
-                                    <div key={key} className="mb-1 break-words">
-                                      <span className="font-bold capitalize text-purple-300 text-sm">
-                                        {key.replace(/_/g, " ")}:
-                                      </span>{" "}
-                                      {Array.isArray(value) ? (
-                                        <span className="text-purple-100">
-                                          {value.join(", ")}
-                                        </span>
-                                      ) : value && typeof value === "object" ? (
-                                        <details>
-                                          <summary className="text-purple-200 cursor-pointer">
-                                            Show details
-                                          </summary>
-                                          <pre className="text-purple-100 bg-black/30 rounded p-2 mt-2 overflow-x-auto text-xs">
-                                            {JSON.stringify(value, null, 2)}
-                                          </pre>
-                                        </details>
-                                      ) : (
-                                        <span className="text-purple-100">
-                                          {String(value)}
-                                        </span>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
+                            {otherFields.map(([key, value]) => {
+                              // Remove 'value' if not used, or use '_' if required by linter
+                              if (typeof value === "undefined") {
+                                return null;
+                              }
+                              return (
+                                <div key={key} className="mb-1 break-words">
+                                  <span className="font-bold capitalize text-purple-300 text-sm">
+                                    {key.replace(/_/g, " ")}:
+                                  </span>{" "}
+                                  {Array.isArray(value) ? (
+                                    <span className="text-purple-100">
+                                      {value.join(", ")}
+                                    </span>
+                                  ) : value && typeof value === "object" ? (
+                                    <details>
+                                      <summary className="text-purple-200 cursor-pointer">
+                                        Show details
+                                      </summary>
+                                      <pre className="text-purple-100 bg-black/30 rounded p-2 mt-2 overflow-x-auto text-xs">
+                                        {JSON.stringify(value, null, 2)}
+                                      </pre>
+                                    </details>
+                                  ) : (
+                                    <span className="text-purple-100">
+                                      {String(value)}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
                             {/* Extra Sections (job description sections) */}
                             {extra_sections && (
                               <div className="mt-4">
