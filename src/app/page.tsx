@@ -22,7 +22,7 @@ interface FormData {
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://b8bc-103-247-7-136.ngrok-free.app";
+  "https://8986-103-247-7-136.ngrok-free.app";
 
 const portals = [
   {
@@ -56,7 +56,7 @@ const portals = [
   {
     key: "linkedin",
     label: "LinkedIn",
-    endpoint: `${API_BASE}/scrape-linkedin/`,
+    endpoint: `${API_BASE}/linkedin/scrape-linkedin-detailed/`,
     params: ["search_term", "location", "results_wanted"],
     method: "POST",
   },
@@ -118,109 +118,132 @@ export default function Home() {
       console.log("📡 Endpoint:", portal.endpoint);
       console.log("📝 Form data:", form);
 
-      if (portal.method === "GET") {
-        const params = new URLSearchParams();
-        portal.params.forEach((param) => {
-          const value = form[param as keyof typeof form];
-          if (value !== undefined && value !== "") {
-            params.append(param, String(value));
+      switch (portal.method) {
+        case "GET": {
+          const params = new URLSearchParams();
+          portal.params.forEach((param) => {
+            const value = form[param as keyof typeof form];
+            if (value !== undefined && value !== "") {
+              params.append(param, String(value));
+            }
+          });
+          const url = `${
+            portal.endpoint
+          }?${params.toString()}&_t=${Date.now()}`;
+          console.log("🔗 GET URL:", url);
+
+          const res = await fetch(url, {
+            cache: "no-cache",
+            headers: {
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+            },
+            mode: "cors",
+          });
+          console.log("📊 Response status:", res.status);
+          console.log(
+            "📊 Response headers:",
+            Object.fromEntries(res.headers.entries())
+          );
+
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error("❌ Error response:", errorText);
+            throw new Error(errorText);
           }
-        });
-        const url = `${portal.endpoint}?${params.toString()}&_t=${Date.now()}`;
-        console.log("🔗 GET URL:", url);
 
-        const res = await fetch(url, {
-          cache: "no-cache",
-          headers: {
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-          },
-          mode: "cors",
-        });
-        console.log("📊 Response status:", res.status);
-        console.log(
-          "📊 Response headers:",
-          Object.fromEntries(res.headers.entries())
-        );
+          const responseText = await res.text();
+          console.log(
+            "📄 Raw response:",
+            responseText.substring(0, 500) + "..."
+          );
 
-        if (!res.ok) {
-          const errorText = await res.text();
-          console.error("❌ Error response:", errorText);
-          throw new Error(errorText);
+          let data;
+          try {
+            data = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error("❌ JSON parse error:", parseError);
+            console.error("📄 Full response:", responseText);
+            throw new Error("Invalid JSON response from server");
+          }
+
+          console.log("✅ Success response:", data);
+          if (portal.key === "linkedin") {
+            setResults(data.job_details || []);
+          } else {
+            setResults(data.jobs || data.scraped_jobs || data);
+          }
+          break;
         }
+        case "POST": {
+          // Different request body format for different scrapers
+          let requestBody;
+          if (["linkedin", "indeed", "naukri"].includes(portal.key)) {
+            // For jobspy scrapers
+            requestBody = {
+              site_name: portal.key,
+              search_term: form.search_term || form.job_title,
+              location: form.location,
+              results_wanted: form.results_wanted || form.num_jobs,
+            };
+          } else {
+            // For custom scrapers (foundit, glassdoor, simplyhired, ziprecruiter)
+            requestBody = {
+              job_title: form.job_title,
+              location: form.location,
+              num_jobs: form.num_jobs,
+            };
+          }
+          console.log("📤 POST request body:", requestBody);
 
-        const responseText = await res.text();
-        console.log("📄 Raw response:", responseText.substring(0, 500) + "...");
+          const res = await fetch(`${portal.endpoint}?_t=${Date.now()}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+            },
+            cache: "no-cache",
+            mode: "cors",
+            body: JSON.stringify(requestBody),
+          });
+          console.log("📊 Response status:", res.status);
+          console.log(
+            "📊 Response headers:",
+            Object.fromEntries(res.headers.entries())
+          );
 
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error("❌ JSON parse error:", parseError);
-          console.error("📄 Full response:", responseText);
-          throw new Error("Invalid JSON response from server");
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error("❌ Error response:", errorText);
+            throw new Error(errorText);
+          }
+
+          const responseText = await res.text();
+          console.log(
+            "📄 Raw response:",
+            responseText.substring(0, 500) + "..."
+          );
+
+          let data;
+          try {
+            data = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error("❌ JSON parse error:", parseError);
+            console.error("📄 Full response:", responseText);
+            throw new Error("Invalid JSON response from server");
+          }
+
+          console.log("✅ Success response:", data);
+          if (portal.key === "linkedin") {
+            setResults(data.job_details || []);
+          } else {
+            setResults(data.jobs || data.scraped_jobs || data);
+          }
+          break;
         }
-
-        console.log("✅ Success response:", data);
-        setResults(data.scraped_jobs || data);
-      } else if (portal.method === "POST") {
-        // Different request body format for different scrapers
-        let requestBody;
-        if (["linkedin", "indeed", "naukri"].includes(portal.key)) {
-          // For jobspy scrapers
-          requestBody = {
-            site_name: portal.key,
-            search_term: form.search_term || form.job_title,
-            location: form.location,
-            results_wanted: form.results_wanted || form.num_jobs,
-          };
-        } else {
-          // For custom scrapers (foundit, glassdoor, simplyhired, ziprecruiter)
-          requestBody = {
-            job_title: form.job_title,
-            location: form.location,
-            num_jobs: form.num_jobs,
-          };
-        }
-        console.log("📤 POST request body:", requestBody);
-
-        const res = await fetch(`${portal.endpoint}?_t=${Date.now()}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-          },
-          cache: "no-cache",
-          mode: "cors",
-          body: JSON.stringify(requestBody),
-        });
-        console.log("📊 Response status:", res.status);
-        console.log(
-          "📊 Response headers:",
-          Object.fromEntries(res.headers.entries())
-        );
-
-        if (!res.ok) {
-          const errorText = await res.text();
-          console.error("❌ Error response:", errorText);
-          throw new Error(errorText);
-        }
-
-        const responseText = await res.text();
-        console.log("📄 Raw response:", responseText.substring(0, 500) + "...");
-
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error("❌ JSON parse error:", parseError);
-          console.error("📄 Full response:", responseText);
-          throw new Error("Invalid JSON response from server");
-        }
-
-        console.log("✅ Success response:", data);
-        setResults(data.jobs || data.scraped_jobs || data);
+        default:
+          throw new Error(`Unsupported method: ${portal.method}`);
       }
     } catch (err) {
       console.error("💥 Search error:", err);
