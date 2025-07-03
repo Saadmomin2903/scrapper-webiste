@@ -36,9 +36,11 @@ const portals = [
   {
     key: "glassdoor",
     label: "Glassdoor",
-    endpoint: `${API_BASE}/glassdoor/scrape_jobs_parallel`,
+    endpoint: `${API_BASE}/start_glassdoor_scrape`,
+    statusEndpoint: `${API_BASE}/glassdoor_scrape_status`,
     params: ["job_title", "location", "num_jobs"],
     method: "POST",
+    isAsync: true,
   },
   {
     key: "simplyhired",
@@ -112,6 +114,57 @@ export default function Home() {
     setLoading(true);
     setError(null);
     setResults(null);
+
+    // Glassdoor async job queue logic
+    if (portal.key === "glassdoor" && portal.isAsync) {
+      try {
+        // 1. Start the job
+        const res = await fetch(portal.endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            job_title: form.job_title,
+            location: form.location,
+            num_jobs: form.num_jobs,
+          }),
+        });
+        const { job_id } = await res.json();
+        if (!job_id) throw new Error("Failed to start job");
+
+        // 2. Poll for status
+        let status = "pending";
+        let pollResult = null;
+        let pollCount = 0;
+        while (status === "pending" || status === "running") {
+          pollCount++;
+          setLoading(true);
+          setError(null);
+          await new Promise((r) => setTimeout(r, 5000));
+          const pollRes = await fetch(
+            `${portal.statusEndpoint}?job_id=${job_id}`
+          );
+          pollResult = await pollRes.json();
+          status = pollResult.status;
+          if (status === "done") {
+            setResults(
+              pollResult.result.scraped_jobs ||
+                pollResult.result.jobs ||
+                pollResult.result
+            );
+            setLoading(false);
+            break;
+          } else if (status === "error") {
+            setError(pollResult.error || "Scraping failed");
+            setLoading(false);
+            break;
+          }
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+        setLoading(false);
+      }
+      return;
+    }
 
     try {
       console.log("🔍 Starting search for portal:", portal.key);
