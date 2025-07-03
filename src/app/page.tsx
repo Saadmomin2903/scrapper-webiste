@@ -36,7 +36,7 @@ const portals = [
   {
     key: "glassdoor",
     label: "Glassdoor",
-    endpoint: `${API_BASE}/glassdoor/scrape_jobs`,
+    endpoint: `${API_BASE}/glassdoor/scrape_jobs_parallel`,
     params: ["job_title", "location", "num_jobs"],
     method: "POST",
   },
@@ -487,13 +487,13 @@ export default function Home() {
                           <CardContent className="p-6 flex flex-col gap-3">
                             {/* Title */}
                             {title && (
-                              <div className="text-2xl font-bold text-purple-200 mb-2">
+                              <div className="text-2xl font-black text-purple-200 mb-3 bg-gradient-to-r from-purple-400/20 to-pink-400/20 p-3 rounded-lg border border-purple-500/20">
                                 {title}
                               </div>
                             )}
                             {/* Company name and logo */}
                             {(company_name || company_logo) && (
-                              <div className="flex items-center gap-3 mb-2">
+                              <div className="flex items-center gap-3 mb-3 p-2 bg-purple-900/20 rounded-lg border border-purple-600/20">
                                 {company_logo &&
                                 typeof company_logo === "string" &&
                                 (company_logo.startsWith("http://") ||
@@ -503,34 +503,34 @@ export default function Home() {
                                     alt="Company logo"
                                     width={48}
                                     height={48}
-                                    className="rounded-full object-contain border-2 border-purple-500/30"
+                                    className="rounded-full object-contain border-2 border-purple-500/30 shadow-lg"
                                   />
                                 ) : null}
                                 {company_name && (
-                                  <span className="text-lg font-semibold text-purple-300">
-                                    {company_name}
+                                  <span className="text-lg font-bold text-purple-300">
+                                    🏢 {company_name}
                                   </span>
                                 )}
                               </div>
                             )}
                             {/* Location */}
                             {location && (
-                              <div className="mb-1">
+                              <div className="mb-2 p-2 bg-purple-800/20 rounded-lg border border-purple-600/20">
                                 <span className="font-bold text-purple-300">
-                                  Location:
+                                  📍 Location:
                                 </span>{" "}
-                                <span className="text-purple-100">
+                                <span className="text-purple-100 font-medium">
                                   {location}
                                 </span>
                               </div>
                             )}
                             {/* Salary/Pay */}
                             {salary && (
-                              <div className="mb-1">
-                                <span className="font-bold text-purple-300">
-                                  Salary/Pay:
+                              <div className="mb-3 p-2 bg-green-900/20 rounded-lg border border-green-600/20">
+                                <span className="font-bold text-green-300">
+                                  💰 Salary/Pay:
                                 </span>{" "}
-                                <span className="text-purple-100">
+                                <span className="text-green-100 font-medium">
                                   {salary}
                                 </span>
                               </div>
@@ -554,7 +554,7 @@ export default function Home() {
                             {/* Job Description (markdown) */}
                             {job_description &&
                               typeof job_description === "string" && (
-                                <div className="prose prose-invert max-w-none text-purple-100 my-4">
+                                <div className="prose prose-invert max-w-none text-purple-100 my-4 [&>*]:text-purple-100 [&>h1]:text-3xl [&>h1]:font-black [&>h1]:text-purple-300 [&>h1]:border-b-2 [&>h1]:border-purple-500/30 [&>h1]:pb-2 [&>h1]:mb-4 [&>h2]:text-2xl [&>h2]:font-bold [&>h2]:text-purple-400 [&>h2]:border-b [&>h2]:border-purple-600/20 [&>h2]:pb-1 [&>h2]:mb-3 [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:text-purple-500 [&>h3]:mb-2 [&>h4]:text-lg [&>h4]:font-medium [&>h4]:text-purple-600 [&>h4]:mb-2 [&>h5]:text-base [&>h5]:font-medium [&>h5]:text-purple-700 [&>h5]:mb-1 [&>h6]:text-sm [&>h6]:font-medium [&>h6]:text-purple-800 [&>h6]:mb-1 [&>p]:text-purple-100 [&>p]:mb-2 [&>ul]:list-disc [&>ul]:list-inside [&>ul]:text-purple-100 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:list-inside [&>ol]:text-purple-100 [&>ol]:mb-2 [&>li]:text-purple-100 [&>li]:mb-1 [&>strong]:text-purple-300 [&>strong]:font-semibold [&>em]:text-purple-200 [&>em]:italic [&>code]:bg-purple-900/30 [&>code]:text-purple-200 [&>code]:px-1 [&>code]:py-0.5 [&>code]:rounded [&>code]:text-sm [&>blockquote]:border-l-4 [&>blockquote]:border-purple-500/50 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-purple-200 [&>blockquote]:bg-purple-900/10 [&>blockquote]:py-2 [&>blockquote]:rounded-r">
                                   <ReactMarkdown>
                                     {job_description}
                                   </ReactMarkdown>
@@ -594,33 +594,45 @@ export default function Home() {
                             })}
                             {/* Extra Sections (job description sections) */}
                             {extra_sections && (
-                              <div className="mt-4">
-                                <h3 className="text-lg font-bold text-purple-400 mb-2">
-                                  Job Description Sections
+                              <div className="mt-6">
+                                <h3 className="text-xl font-bold text-purple-400 mb-4 border-b-2 border-purple-500/30 pb-2">
+                                  📋 Job Description Sections
                                 </h3>
-                                {Object.entries(extra_sections).map(
-                                  ([section, content]) => (
-                                    <div
-                                      key={section}
-                                      className="mb-4 p-4 rounded-lg bg-purple-900/20 border border-purple-700/30"
-                                    >
-                                      <div className="font-semibold text-purple-300 mb-1 capitalize">
-                                        {section.replace(/_/g, " ")}
-                                      </div>
-                                      {Array.isArray(content) ? (
-                                        <ul className="list-disc list-inside text-purple-100">
-                                          {content.map((item, idx) => (
-                                            <li key={idx}>{item}</li>
-                                          ))}
-                                        </ul>
-                                      ) : (
-                                        <div className="text-purple-100 whitespace-pre-line">
-                                          {String(content)}
+                                <div className="space-y-4">
+                                  {Object.entries(extra_sections).map(
+                                    ([section, content], sectionIdx) => (
+                                      <div
+                                        key={section}
+                                        className="p-4 rounded-lg bg-gradient-to-br from-purple-900/30 to-purple-800/20 border border-purple-700/40 shadow-lg hover:shadow-purple-500/10 transition-all duration-300 hover:scale-[1.02]"
+                                        style={{
+                                          animationDelay: `${
+                                            sectionIdx * 50
+                                          }ms`,
+                                        }}
+                                      >
+                                        <div className="font-bold text-purple-300 mb-3 capitalize text-lg border-b border-purple-600/30 pb-1">
+                                          {section.replace(/_/g, " ")}
                                         </div>
-                                      )}
-                                    </div>
-                                  )
-                                )}
+                                        {Array.isArray(content) ? (
+                                          <ul className="list-disc list-inside text-purple-100 space-y-1">
+                                            {content.map((item, idx) => (
+                                              <li
+                                                key={idx}
+                                                className="text-purple-100 hover:text-purple-200 transition-colors duration-200"
+                                              >
+                                                {item}
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        ) : (
+                                          <div className="text-purple-100 whitespace-pre-line leading-relaxed">
+                                            {String(content)}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )
+                                  )}
+                                </div>
                               </div>
                             )}
                           </CardContent>
