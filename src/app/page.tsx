@@ -36,11 +36,9 @@ const portals = [
   {
     key: "glassdoor",
     label: "Glassdoor",
-    endpoint: `${API_BASE}/start_glassdoor_scrape`,
-    statusEndpoint: `${API_BASE}/glassdoor_scrape_status`,
+    endpoint: `${API_BASE}/glassdoor/scrape_jobs_parallel`,
     params: ["job_title", "location", "num_jobs"],
     method: "POST",
-    isAsync: true,
   },
   {
     key: "simplyhired",
@@ -114,76 +112,6 @@ export default function Home() {
     setLoading(true);
     setError(null);
     setResults(null);
-
-    // Glassdoor async job queue logic
-    if (portal.key === "glassdoor" && portal.isAsync) {
-      try {
-        // 1. Start the job
-        const res = await fetch(portal.endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            job_title: form.job_title,
-            location: form.location,
-            num_jobs: form.num_jobs,
-          }),
-        });
-        const rawText = await res.text();
-        console.log("Raw response from /start_glassdoor_scrape:", rawText);
-        let job_id;
-        try {
-          const json = JSON.parse(rawText);
-          job_id = json.job_id;
-        } catch {
-          setError("Invalid JSON response from backend: " + rawText);
-          setLoading(false);
-          return;
-        }
-        if (!job_id) {
-          setError("No job_id in response: " + rawText);
-          setLoading(false);
-          return;
-        }
-
-        // 2. Poll for status
-        let status = "pending";
-        while (status === "pending" || status === "running") {
-          setLoading(true);
-          setError(null);
-          await new Promise((r) => setTimeout(r, 5000));
-          const pollRes = await fetch(
-            `${portal.statusEndpoint}?job_id=${job_id}`
-          );
-          try {
-            const pollResult = await pollRes.json();
-            status = pollResult.status;
-            if (status === "done") {
-              setResults(
-                pollResult.result.scraped_jobs ||
-                  pollResult.result.jobs ||
-                  pollResult.result
-              );
-              setLoading(false);
-              break;
-            } else if (status === "error") {
-              setError(pollResult.error || "Scraping failed");
-              setLoading(false);
-              break;
-            }
-          } catch {
-            setError(
-              "Server returned an invalid response. Please check backend status."
-            );
-            setLoading(false);
-            return;
-          }
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-        setLoading(false);
-      }
-      return;
-    }
 
     try {
       console.log("🔍 Starting search for portal:", portal.key);
