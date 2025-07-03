@@ -134,9 +134,7 @@ export default function Home() {
         // 2. Poll for status
         let status = "pending";
         let pollResult = null;
-        let pollCount = 0;
         while (status === "pending" || status === "running") {
-          pollCount++;
           setLoading(true);
           setError(null);
           await new Promise((r) => setTimeout(r, 5000));
