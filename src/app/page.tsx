@@ -23,7 +23,7 @@ interface FormData {
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://8986-103-247-7-136.ngrok-free.app";
+  "https://4a70-103-247-7-136.ngrok-free.app";
 
 const portals = [
   {
