@@ -128,8 +128,22 @@ export default function Home() {
             num_jobs: form.num_jobs,
           }),
         });
-        const { job_id } = await res.json();
-        if (!job_id) throw new Error("Failed to start job");
+        const rawText = await res.text();
+        console.log("Raw response from /start_glassdoor_scrape:", rawText);
+        let job_id;
+        try {
+          const json = JSON.parse(rawText);
+          job_id = json.job_id;
+        } catch {
+          setError("Invalid JSON response from backend: " + rawText);
+          setLoading(false);
+          return;
+        }
+        if (!job_id) {
+          setError("No job_id in response: " + rawText);
+          setLoading(false);
+          return;
+        }
 
         // 2. Poll for status
         let status = "pending";
