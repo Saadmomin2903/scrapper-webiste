@@ -141,7 +141,16 @@ export default function Home() {
           const pollRes = await fetch(
             `${portal.statusEndpoint}?job_id=${job_id}`
           );
-          pollResult = await pollRes.json();
+          let pollResult;
+          try {
+            pollResult = await pollRes.json();
+          } catch (e) {
+            setError(
+              "Server returned an invalid response. Please check backend status."
+            );
+            setLoading(false);
+            return;
+          }
           status = pollResult.status;
           if (status === "done") {
             setResults(
