@@ -133,7 +133,6 @@ export default function Home() {
 
         // 2. Poll for status
         let status = "pending";
-        let pollResult = null;
         while (status === "pending" || status === "running") {
           setLoading(true);
           setError(null);
@@ -141,29 +140,28 @@ export default function Home() {
           const pollRes = await fetch(
             `${portal.statusEndpoint}?job_id=${job_id}`
           );
-          let pollResult;
           try {
-            pollResult = await pollRes.json();
-          } catch (e) {
+            const pollResult = await pollRes.json();
+            status = pollResult.status;
+            if (status === "done") {
+              setResults(
+                pollResult.result.scraped_jobs ||
+                  pollResult.result.jobs ||
+                  pollResult.result
+              );
+              setLoading(false);
+              break;
+            } else if (status === "error") {
+              setError(pollResult.error || "Scraping failed");
+              setLoading(false);
+              break;
+            }
+          } catch {
             setError(
               "Server returned an invalid response. Please check backend status."
             );
             setLoading(false);
             return;
-          }
-          status = pollResult.status;
-          if (status === "done") {
-            setResults(
-              pollResult.result.scraped_jobs ||
-                pollResult.result.jobs ||
-                pollResult.result
-            );
-            setLoading(false);
-            break;
-          } else if (status === "error") {
-            setError(pollResult.error || "Scraping failed");
-            setLoading(false);
-            break;
           }
         }
       } catch (err) {
