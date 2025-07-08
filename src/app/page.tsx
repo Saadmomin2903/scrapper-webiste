@@ -23,7 +23,7 @@ interface FormData {
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://4a70-103-247-7-136.ngrok-free.app";
+  "https://d0b15485c29b.ngrok-free.app";
 
 const portals = [
   {
@@ -57,7 +57,7 @@ const portals = [
   {
     key: "linkedin",
     label: "LinkedIn",
-    endpoint: `${API_BASE}/linkedin/scrape-linkedin-detailed/`,
+    endpoint: `${API_BASE}/linkedin/scrape-linkedin/`,
     params: ["search_term", "location", "results_wanted"],
     method: "POST",
   },
@@ -169,9 +169,7 @@ export default function Home() {
           }
 
           console.log("✅ Success response:", data);
-          if (portal.key === "linkedin") {
-            setResults(data.job_details || []);
-          } else if (portal.key === "naukri") {
+          if (portal.key === "naukri") {
             setResults(data.job_details || []);
           } else {
             setResults(data.jobs || data.scraped_jobs || data);
@@ -181,10 +179,15 @@ export default function Home() {
         case "POST": {
           // Different request body format for different scrapers
           let requestBody;
-          if (["linkedin", "indeed", "naukri"].includes(portal.key)) {
-            // For jobspy scrapers
+          if (portal.key === "linkedin") {
             requestBody = {
-              site_name: portal.key,
+              search_term: form.search_term || form.job_title,
+              location: form.location,
+              results_wanted: form.results_wanted || form.num_jobs,
+              linkedin_fetch_description: true,
+            };
+          } else if (["indeed", "naukri"].includes(portal.key)) {
+            requestBody = {
               search_term: form.search_term || form.job_title,
               location: form.location,
               results_wanted: form.results_wanted || form.num_jobs,
@@ -238,9 +241,7 @@ export default function Home() {
           }
 
           console.log("✅ Success response:", data);
-          if (portal.key === "linkedin") {
-            setResults(data.job_details || []);
-          } else if (portal.key === "naukri") {
+          if (portal.key === "naukri") {
             setResults(data.job_details || []);
           } else {
             setResults(data.jobs || data.scraped_jobs || data);
@@ -447,18 +448,24 @@ export default function Home() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {results && Array.isArray(results) && results.length > 0 ? (
                   results.map((job: JobData, idx: number) => {
+                    // Filter out fields with null or empty string values
+                    const filteredJob = Object.fromEntries(
+                      Object.entries(job).filter(
+                        ([, value]) => value !== null && value !== ""
+                      )
+                    );
                     // Prepare fields for ordered display
-                    const title = job.title;
-                    const company_name = job.company_name;
-                    const company_logo = job.company_logo;
-                    const location = job.location;
-                    const salary = job.salary || job.pay;
-                    const jd_url = job.jd_url;
-                    const job_description = job.job_description;
+                    const title = filteredJob.title;
+                    const company_name = filteredJob.company_name;
+                    const company_logo = filteredJob.company_logo;
+                    const location = filteredJob.location;
+                    const salary = filteredJob.salary || filteredJob.pay;
+                    const jd_url = filteredJob.jd_url;
+                    const job_description = filteredJob.job_description;
                     const extra_sections =
-                      job.extra_sections &&
-                      typeof job.extra_sections === "object"
-                        ? job.extra_sections
+                      filteredJob.extra_sections &&
+                      typeof filteredJob.extra_sections === "object"
+                        ? filteredJob.extra_sections
                         : null;
                     // Collect all other fields except the above
                     const shownKeys = new Set([
@@ -472,7 +479,7 @@ export default function Home() {
                       "job_description",
                       "extra_sections",
                     ]);
-                    const otherFields = Object.entries(job).filter(
+                    const otherFields = Object.entries(filteredJob).filter(
                       ([key]) => !shownKeys.has(key)
                     );
                     return (
@@ -562,7 +569,7 @@ export default function Home() {
                               )}
                             {/* Other fields */}
                             {otherFields.map(([key]) => {
-                              const value = job[key];
+                              const value = filteredJob[key];
                               if (typeof value === "undefined") {
                                 return null;
                               }
